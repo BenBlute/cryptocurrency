@@ -3,28 +3,41 @@ from time import time
 from itertools import zip_longest
 
 from crypto import key_to_string, sha256
+from transaction import Transaction
 
 
 class Block:
 
     @classmethod
-    def create(cls, key, transactions, previous_hash, difficulty):
+    def create(cls, key, previous_hash, difficulty):
         obj = cls()
 
-        obj.miner = key_to_string(key.public_key())
-        obj.transactions = transactions
+        obj.transactions = [Transaction.create_mining_rewards(key, [])]
         obj.previous_hash = previous_hash
         obj.merkle_root = obj.calculate_merkle_root()
         obj.nonce = randint(0, 2**32)
         obj.difficulty = difficulty
-        obj.timestamp = str(time())
+        obj.timestamp = time()
 
         return obj
 
+    @classmethod
+    def create_genesis(cls):
+        obj = cls()
+
+        obj.transactions = []
+        obj.previous_hash = ''
+        obj.merkle_root = ''
+        obj.nonce = 0
+        obj.difficulty = 1
+        obj.timestamp = time()
+
+        return obj
+
+    @classmethod
     def from_json(cls, json):
         obj = cls()
 
-        obj.miner = json['miner']
         obj.transactions = [Transaction.from_json(t) for t in json['transactions']]
         obj.previous_hash = json['previous_hash']
         obj.merkle_root = json['merkle_root']
@@ -36,7 +49,6 @@ class Block:
 
     def to_json(self):
         return {
-            'miner': self.miner,
             'transactions': [t.to_json() for t in self.transactions],
             'previous_hash': self.previous_hash,
             'merkle_root': self.merkle_root,
@@ -44,6 +56,11 @@ class Block:
             'difficulty': self.difficulty,
             'timestamp': self.timestamp
         }
+
+    def add_transaction(self, transaction):
+        if transaction not in self.transactions:
+            self.transactions.append(transaction)
+            self.merkle_root = self.calculate_merkle_root()
 
     def add_transactions(self, transactions):
         modified = False
@@ -67,14 +84,14 @@ class Block:
         return hashes[0]
 
     def hash(self):
-        string = self.miner
+        string = ''
         for t in self.transactions:
             string += t.hash()
         string += self.previous_hash
         string += self.merkle_root
-        string += self.nonce
-        string += self.difficulty
-        string += self.timestamp
+        string += str(self.nonce)
+        string += str(self.difficulty)
+        string += str(self.timestamp)
 
         return sha256(string)
 

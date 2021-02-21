@@ -11,7 +11,17 @@ class Transaction:
 
         obj.inputs = inputs
         obj.outputs = outputs
-        obj.timestamp = str(time())
+        obj.timestamp = time()
+
+        return obj
+
+    @classmethod
+    def create_mining_rewards(cls, key, fees):
+        obj = cls()
+
+        obj.inputs = [Input.create_mining_rewards(key)]
+        obj.outputs = [Output.create_mining_rewards(key, fees)]
+        obj.timestamp = time()
 
         return obj
 
@@ -38,7 +48,7 @@ class Transaction:
             string += i.hash()
         for o in self.outputs:
             string += o.hash()
-        string += self.timestamp
+        string += str(self.timestamp)
 
         return sha256(string)
 
@@ -61,6 +71,18 @@ class Input:
         string += obj.output_hash
 
         obj.signature = sign_message(key, string)
+
+        return obj
+
+    @classmethod
+    def create_mining_rewards(cls, key):
+        obj = cls()
+
+        obj.block_hash = ''
+        obj.transaction_hash = ''
+        obj.output_hash = ''
+
+        obj.signature = sign_message(key, '')
 
         return obj
 
@@ -104,6 +126,15 @@ class Output:
         return obj
 
     @classmethod
+    def create_mining_rewards(cls, key, fees):
+        obj = cls()
+
+        obj.recipient = key_to_string(key.public_key())
+        obj.amount = 1 + fees
+
+        return obj
+
+    @classmethod
     def from_json(cls, json):
         obj = cls()
 
@@ -120,7 +151,7 @@ class Output:
 
     def hash(self):
         string = self.recipient
-        string += self.amount
+        string += str(self.amount)
 
         return sha256(string)
 
