@@ -2,7 +2,7 @@ from random import randint
 from time import time
 from itertools import zip_longest
 
-from crypto import key_to_string, sha256
+from crypto import key_to_string, sha256, sha256_integer
 from transaction import Transaction
 
 
@@ -83,7 +83,17 @@ class Block:
 
         return hashes[0]
 
-    def hash(self):
+    def mine(self):
+        target = (2 ** 224) / self.difficulty
+
+        while True:
+            self.nonce += 1
+            self.timestamp = time()
+
+            if self.hash(integer=True) < target:
+                return
+
+    def hash(self, integer=False):
         string = ''
         for t in self.transactions:
             string += t.hash()
@@ -92,6 +102,9 @@ class Block:
         string += str(self.nonce)
         string += str(self.difficulty)
         string += str(self.timestamp)
+
+        if integer:
+            return sha256_integer(string)
 
         return sha256(string)
 

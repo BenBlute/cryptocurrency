@@ -50,3 +50,7 @@ def validate_signature(key, message, signature):
 def sha256(x):
     return b64encode(SHA256.new(x.encode()).digest()).decode()
 
+
+def sha256_integer(x):
+    return int.from_bytes(SHA256.new(x.encode()).digest(), 'big')
+
