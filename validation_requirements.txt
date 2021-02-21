@@ -1,0 +1,68 @@
+Blockchain:
+
+- All attributes are the correct types
+- First block is a genesis block
+
+Genesis Block:
+
+- All attributes are the correct types
+- Transactions is an empty list
+- Previous hash is an empty string
+- Merkle root is an empty string
+- Nonce is 0
+- Difficulty is 1
+- Timestamp is not in the future
+
+Block:
+
+- All attributes are the correct types
+- First transaction is a mining rewards transaction
+- Previous hash equals hash of previous block
+- Merkle root matches merkle root of transactions
+- Difficulty equals previous difficulty times two weeks divided by the time difference between
+  the current block and the block that came 2016 blocks before it (or 1 for the first 2016 blocks)
+- Timestamp is greater than the timestamp of the previous block, but not in the future
+- The hash of the block is less than 2 to the power of 224 divided by difficulty
+
+Mining Rewards Transaction:
+
+- All attributes are the correct types
+- First and only input is a mining rewards input
+- First and only output is a mining rewards output
+- Timestamp is not in the future
+
+Transaction:
+
+- All attributes are the correct types
+- Sum of inputs is greater than or equal to the sum of the outputs
+- Timestamp is not in the future
+
+Mining Rewards Input:
+
+- All attributes are the correct types
+- Block hash is an empty string
+- Transaction hash is an empty string
+- Output hash is an empty string
+- Signature validates against an empty message and the mining rewards output's recipient
+
+Input:
+
+- All attributes are the correct types
+- Output corresponding to the block hash, transaction hash, and output hash exists on a previous
+  block in the blockchain and is unspent
+- The signature validates against the block hash, transaction hash, and output hash concatonated
+  together and the recipient of the output corresponding to the three hashes
+
+Mining Rewards Output:
+
+- All attributes are the correct types
+- Recipient is a valid public key
+- Amount is equal to 1 plus the sum of the differences between the inputs and outputs of every
+  transaction in the block
+
+Output:
+
+- All attributes are the correct types
+- Recipient is a valid public key
+- Amount is greater than or equal to 0
+
