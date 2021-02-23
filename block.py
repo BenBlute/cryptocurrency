@@ -9,14 +9,15 @@ from transaction import Transaction
 class Block:
 
     @classmethod
-    def create(cls, key, previous_hash, difficulty):
+    def create(cls, key, previous_hash, difficulty, height):
         obj = cls()
 
-        obj.transactions = [Transaction.create_mining_rewards(key, [])]
+        obj.transactions = [Transaction.create_mining_rewards(key)]
         obj.previous_hash = previous_hash
         obj.merkle_root = obj.calculate_merkle_root()
         obj.nonce = randint(0, 2**32)
         obj.difficulty = difficulty
+        obj.height = height
         obj.timestamp = time()
 
         return obj
@@ -30,6 +31,7 @@ class Block:
         obj.merkle_root = ''
         obj.nonce = 0
         obj.difficulty = 1
+        obj.height = 0
         obj.timestamp = time()
 
         return obj
@@ -43,6 +45,7 @@ class Block:
         obj.merkle_root = json['merkle_root']
         obj.nonce = json['nonce']
         obj.difficulty = json['difficulty']
+        obj.height = json['height']
         obj.timestamp = json['timestamp']
 
         return obj
@@ -54,6 +57,7 @@ class Block:
             'merkle_root': self.merkle_root,
             'nonce': self.nonce,
             'difficulty': self.difficulty,
+            'height': self.height,
             'timestamp': self.timestamp
         }
 
@@ -101,6 +105,7 @@ class Block:
         string += self.merkle_root
         string += str(self.nonce)
         string += str(self.difficulty)
+        string += str(self.height)
         string += str(self.timestamp)
 
         if integer:

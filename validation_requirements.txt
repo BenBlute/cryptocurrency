@@ -19,8 +19,10 @@ Block:
 - First transaction is a mining rewards transaction
 - Previous hash equals hash of previous block
 - Merkle root matches merkle root of transactions
+- Difficulty equals previous difficulty if height modulus 2016 is not zero
 - Difficulty equals previous difficulty times two weeks divided by the time difference between
-  the current block and the block that came 2016 blocks before it (or 1 for the first 2016 blocks)
+  the current block and the block that came 2016 blocks before it if height modulus 2016 is zero
+- Height equals 1 plus the height of the previous block
 - Timestamp is greater than the timestamp of the previous block, but not in the future
 - The hash of the block is less than 2 to the power of 224 divided by difficulty
 

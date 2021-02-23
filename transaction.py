@@ -1,6 +1,6 @@
 from time import time
 
-from crypto import sha256, key_to_string, sign_message
+from crypto import sha256, key_to_string, string_to_key, sign_message, validate_signature
 
 
 class Transaction:
@@ -16,11 +16,11 @@ class Transaction:
         return obj
 
     @classmethod
-    def create_mining_rewards(cls, key, fees):
+    def create_mining_rewards(cls, key):
         obj = cls()
 
         obj.inputs = [Input.create_mining_rewards(key)]
-        obj.outputs = [Output.create_mining_rewards(key, fees)]
+        obj.outputs = [Output.create_mining_rewards(key)]
         obj.timestamp = time()
 
         return obj
@@ -55,6 +55,58 @@ class Transaction:
     def __eq__(self, other):
         return self.hash() == other.hash()
 
+    def validate(self, utxo, block):
+        try:
+            sum_inputs = 0
+            for input_ in self.inputs:
+                utxo_id = input_.block_hash + input_.transaction_hash + input_.output_hash
+                sum_inputs += utxo[utxo_id].amount
+                key = string_to_key(utxo[utxo_id].recipient)
+                del utxo[utxo_id]
+                assert validate_signature(key, utxo_id, input_.signature)
+
+            sum_outputs = 0
+            for output in self.outputs:
+                sum_outputs += output.amount
+                utxo_id = block.hash() + self.hash() + output.hash()
+                utxo[utxo_id] = output
+                string_to_key(output.recipient)
+                assert output.amount >= 0
+
+            block.fees += sum_inputs - sum_outputs
+
+            assert sum_inputs >= sum_outputs
+            assert self.timestamp < time()
+
+            return True
+        except:
+            return False
+
+    def validate_mining_rewards(self, utxo, block):
+        try:
+            assert len(self.inputs) == 1
+            assert len(self.outputs) == 1
+            assert self.timestamp < time()
+
+            input_ = self.inputs[0]
+            output = self.outputs[0]
+
+            assert input_.block_hash == ''
+            assert input_.transaction_hash == ''
+            assert input_.output_hash == ''
+
+            key = string_to_key(output.recipient)
+
+            assert validate_signature(key, '', input_.signature)
+
+            assert output.amount == 1 + block.fees
+
+            utxo_id = block.hash() + self.hash() + output.hash()
+            utxo[utxo_id] = output
+
+            return True
+        except:
+            return False
 
 class Input:
 
@@ -126,11 +178,11 @@ class Output:
         return obj
 
     @classmethod
-    def create_mining_rewards(cls, key, fees):
+    def create_mining_rewards(cls, key):
         obj = cls()
 
         obj.recipient = key_to_string(key.public_key())
-        obj.amount = 1 + fees
+        obj.amount = 1
 
         return obj
 
