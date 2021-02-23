@@ -63,14 +63,21 @@ class Block:
 
     def add_transactions(self, transactions, utxo):
         modified = False
+        self.fees = 0
 
         for t in transactions:
-            if t.validate(utxo):
+            if t.validate(utxo, self):
                 self.transactions.append(t)
                 modified = True
 
         if modified:
+            self.transactions[0].outputs[0].amount += fees
             self.merkle_root = self.calculate_merkle_root()
+
+    def reset_transactions(self, utxo):
+        transactions = self.transactions
+        self.transactions = []
+        self.add_transactions(transactions)
 
     def calculate_merkle_root(self):
         hashes = [t.hash() for t in self.transactions]

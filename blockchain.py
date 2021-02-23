@@ -26,6 +26,9 @@ class Blockchain:
             'blocks': [b.to_json() for b in self.blocks]
         }
 
+    def __len__(self):
+        return len(self.blocks)
+
     def add_block(self, block):
         self.blocks.append(block)
 
@@ -60,8 +63,8 @@ class Blockchain:
                 assert block.hash(integer=True) < (2**224 / block.difficulty)
 
                 if block.height % 2016 == 0:
-                    time_difference = block.timestamp = previous_timestamp
-                    previous_timestamp = block.timestamp
+                    time_difference = block.timestamp - previous_timestamp
+                    previous_timestamp = previous_block.timestamp
                     assert difficulty == previous_block.difficulty * TWO_WEEKS / time_difference
                 else:
                     assert block.difficulty == previous_block.difficulty

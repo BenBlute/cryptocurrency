@@ -74,11 +74,10 @@ class Transaction:
                 string_to_key(output.recipient)
                 assert output.amount >= 0
 
-            block.fees += sum_inputs - sum_outputs
-
             assert sum_inputs >= sum_outputs
             assert self.timestamp < time()
 
+            block.fees += sum_inputs - sum_outputs
 
             return True
         except:
