@@ -56,6 +56,7 @@ class Transaction:
         return self.hash() == other.hash()
 
     def validate(self, utxo, block):
+        unmodified_utxo = utxo.copy()
         try:
             sum_inputs = 0
             for input_ in self.inputs:
@@ -78,8 +79,11 @@ class Transaction:
             assert sum_inputs >= sum_outputs
             assert self.timestamp < time()
 
+
             return True
         except:
+            utxo.clear()
+            utxo.update(unmodified_utxo)
             return False
 
     def validate_mining_rewards(self, utxo, block):

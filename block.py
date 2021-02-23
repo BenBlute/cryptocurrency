@@ -61,16 +61,11 @@ class Block:
             'timestamp': self.timestamp
         }
 
-    def add_transaction(self, transaction):
-        if transaction not in self.transactions:
-            self.transactions.append(transaction)
-            self.merkle_root = self.calculate_merkle_root()
-
-    def add_transactions(self, transactions):
+    def add_transactions(self, transactions, utxo):
         modified = False
 
         for t in transactions:
-            if t not in self.transactions:
+            if t.validate(utxo):
                 self.transactions.append(t)
                 modified = True
 
